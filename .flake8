@@ -1,0 +1,5 @@
+[flake8]
+ignore = D205, D105, D200, D400
+max-line-length = 88
+extend-ignore = E203
+max-complexity = 18

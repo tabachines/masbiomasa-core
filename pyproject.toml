@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "+bio+a core"
+version = "0.1.0"
+description = "Main app for the +bio+a project"
+authors = ["Tabachines <admin@tabachines.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+
+[tool.poetry.dev-dependencies]
+pytest = "^7.1.2"
+black = "^22.3.0"
+flake8 = "^4.0.1"
+flake8-isort = "^4.1.1"
+flake8-docstrings = "^1.6.0"
+pre-commit = "^2.19.0"
+
+[tool.isort]
+profile = "black"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
