@@ -26,7 +26,9 @@ class CalculateNDVIiew(APIView):
             {
                 "ndvi_url": calculation.ndvi_image.url,
                 "satellite_url": calculation.satellite_image.url,
-                "center": calculation.polygon.centroid.json,
-                "bounds": calculation.polygon.extent.json,
+                "center": json.loads(calculation.polygon.centroid.json).get(
+                    "coordinates"
+                ),
+                "bounds": list(calculation.polygon.extent),
             }
         )
