@@ -34,6 +34,9 @@ class Calculation(models.Model):
         upload_to="carbon_capture_rasters/", null=True, blank=True
     )
     ndvi_image = models.ImageField(upload_to="ndvi_images/", null=True, blank=True)
+    satellite_image = models.ImageField(
+        upload_to="satellite_images/", null=True, blank=True
+    )
     carbon_capture_image = models.ImageField(
         upload_to="carbon_capture_images/", null=True, blank=True
     )

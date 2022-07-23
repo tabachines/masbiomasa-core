@@ -8,6 +8,7 @@ import requests
 from django.conf import settings
 from django.contrib.gis.db.models import PolygonField
 from django.core.files import File
+from django.core.files.base import ContentFile
 
 ee.Initialize(settings.GOOGLE_EARTH_CREDENTIALS)
 
@@ -20,7 +21,7 @@ def get_file(file_url, zipped=False, extension=".tif"):
         file_name = zipfile.namelist()[0]
         file = zipfile.open(file_name)
     else:
-        file = io.BytesIO(response.content)
+        file = ZipFile(response.content)
     return file
 
 
@@ -45,16 +46,58 @@ class NDVIClassificator:
             .filterBounds(self.geometry)
             .filter(ee.Filter.lt("CLOUDY_PIXEL_PERCENTAGE", 10))
             .sort("date", False)
-            .first()
-            .clip(self.geometry)
+            .mean()
         )
-        ndvi = img.normalizedDifference(["B8", "B4"])
+        img_clipped = img.clip(self.geometry)
+        ndvi = img_clipped.normalizedDifference(["B8", "B4"])
 
-        image_url = ndvi.getDownloadUrl(
+        satellite_image_url = img_clipped.getThumbURL(
+            {
+                "bands": ["B4", "B3", "B2"],
+                "region": self.geometry,
+                "dimensions": 256,
+                "format": "png",
+                "gamma": 1.0,
+                "max": 4000,
+                "min": 0.0,
+            }
+        )
+
+        nvdi_image_url = ndvi.getThumbURL(
+            {
+                "region": self.geometry,
+                "dimensions": 256,
+                "format": "png",
+                "max": 1.0,
+                "min": -1.0,
+                "palette": [
+                    "FFFFFF",
+                    "CE7E45",
+                    "DF923D",
+                    "F1B555",
+                    "FCD163",
+                    "99B718",
+                    "74A901",
+                    "66A000",
+                    "529400",
+                    "3E8601",
+                    "207401",
+                    "056201",
+                    "004C00",
+                    "023B01",
+                    "012E01",
+                    "011D01",
+                    "011301",
+                ],
+            }
+        )
+        raster_url = ndvi.getDownloadUrl(
             {
                 "region": self.geometry,
                 "scale": 1000,
             }
         )
-        raster_file = get_file(image_url, zipped=True)
-        return File(raster_file)
+        image = requests.get(nvdi_image_url).content
+        satellite_image = requests.get(satellite_image_url).content
+        raster_file = get_file(raster_url, zipped=True)
+        return File(raster_file), ContentFile(image), ContentFile(satellite_image)

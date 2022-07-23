@@ -16,6 +16,12 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
+from .apps.carbon_capture.views import CalculateNDVIiew
+
 urlpatterns = [
-    path("admin/", admin.site.urls),
+    path("calculate-ndvi/", CalculateNDVIiew.as_view(), name="calculate-ndvi"),
+    path(
+        "",
+        admin.site.urls,
+    ),
 ]
